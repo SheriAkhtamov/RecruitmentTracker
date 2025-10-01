@@ -177,7 +177,12 @@ export default function CandidateCard({ candidate, onEdit, onDelete }: Candidate
       return apiRequest('PUT', `/api/interview-stages/${stageId}/comments`, { comments });
     },
     onSuccess: () => {
+      // Инвалидация ВСЕХ связанных query keys для синхронизации отзывов во всех разделах
       queryClient.invalidateQueries({ queryKey: ['/api/interview-stages/candidate', candidate.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/candidates'] });
+      queryClient.invalidateQueries({ queryKey: ['documentation-candidates'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/candidates/archived'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/interviews'] });
       setEditingFeedback(null);
       setEditedFeedbackText('');
       toast({

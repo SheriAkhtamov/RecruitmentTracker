@@ -138,10 +138,14 @@ export default function EditCandidateModal({ open, onOpenChange, candidate }: Ed
     },
     onSuccess: (data) => {
       console.log('🎉 Кандидат успешно обновлен:', data);
+      // Инвалидация ВСЕХ связанных query keys для синхронизации данных во всех разделах
       queryClient.invalidateQueries({ queryKey: ['/api/candidates'] });
+      queryClient.invalidateQueries({ queryKey: ['documentation-candidates'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/candidates/archived'] });
       queryClient.invalidateQueries({ queryKey: ['/api/analytics/dashboard'] });
-      // Invalidate interview stages for this specific candidate
       queryClient.invalidateQueries({ queryKey: ['/api/interview-stages/candidate', candidate.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/interviews'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       toast({
         title: t('candidateUpdated'),
         description: t('candidateDataSaved'),

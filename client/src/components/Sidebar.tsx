@@ -1,7 +1,15 @@
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/hooks/useTranslation';
-import { getInitials, formatUserRole, canAccessReports } from '@/lib/auth';
+import { 
+  getInitials, 
+  formatUserRole, 
+  canAccessReports,
+  canAccessDocumentation,
+  canAccessArchive,
+  canAccessAnalytics,
+  canAccessAdmin
+} from '@/lib/auth';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import Logo from '@/components/Logo';
 import {
@@ -20,22 +28,33 @@ export default function Sidebar() {
   const { user } = useAuth();
   const { t } = useTranslation();
 
-  const navigation = [
+  const navigation: Array<{
+    name: string;
+    href: string;
+    icon: any;
+    requiresDocAccess?: boolean;
+    requiresArchiveAccess?: boolean;
+    requiresAnalyticsAccess?: boolean;
+    requiresAdminAccess?: boolean;
+  }> = [
     { name: t('dashboard'), href: '/', icon: BarChart3 },
     { name: t('vacancies'), href: '/vacancies', icon: Briefcase },
     { name: t('candidates'), href: '/candidates', icon: Users },
-    { name: t('documentation'), href: '/documentation', icon: FileText },
+    { name: t('documentation'), href: '/documentation', icon: FileText, requiresDocAccess: true },
     { name: t('calendar'), href: '/calendar', icon: Calendar },
-    { name: t('archive'), href: '/archive', icon: Archive },
-    { name: t('analytics'), href: '/analytics', icon: ChartBar, requiresReports: true },
-    { name: t('administration'), href: '/admin', icon: Settings, adminOnly: true },
+    { name: t('archive'), href: '/archive', icon: Archive, requiresArchiveAccess: true },
+    { name: t('analytics'), href: '/analytics', icon: ChartBar, requiresAnalyticsAccess: true },
+    { name: t('administration'), href: '/admin', icon: Settings, requiresAdminAccess: true },
   ];
 
   if (!user) return null;
 
   const filteredNavigation = navigation.filter(item => {
-    if (item.adminOnly && user.role !== 'admin') return false;
-    if (item.requiresReports && !canAccessReports(user)) return false;
+    // Check specific access requirements
+    if (item.requiresDocAccess && !canAccessDocumentation(user)) return false;
+    if (item.requiresArchiveAccess && !canAccessArchive(user)) return false;
+    if (item.requiresAnalyticsAccess && !canAccessAnalytics(user)) return false;
+    if (item.requiresAdminAccess && !canAccessAdmin(user)) return false;
     return true;
   });
 

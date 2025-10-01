@@ -26,6 +26,27 @@ export default function ArchivePage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const locale = language === 'en' ? enUS : ru;
+  
+  // Access control check
+  if (!user) {
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-xl font-semibold text-slate-900 mb-2">{t('accessDenied')}</h2>
+        <p className="text-slate-600">{t('pleaseLogin')}</p>
+      </div>
+    );
+  }
+  
+  // Check if user has permission to access archive
+  const canAccess = user.role === 'admin' || user.role === 'hr_manager';
+  if (!canAccess) {
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-xl font-semibold text-slate-900 mb-2">{t('accessDenied')}</h2>
+        <p className="text-slate-600">{t('noPermissionToAccessThisSection')}</p>
+      </div>
+    );
+  }
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);

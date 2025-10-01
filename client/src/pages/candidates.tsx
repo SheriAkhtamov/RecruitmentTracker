@@ -21,6 +21,7 @@ import AddCandidateModal from '@/components/modals/AddCandidateModal';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Search,
   Filter,
@@ -45,10 +46,16 @@ export default function Candidates() {
   const [sourceFilter, setSourceFilter] = useState('all');
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Employees should only see candidates they are assigned to interview
+  const candidatesEndpoint = user?.role === 'employee' 
+    ? `/api/candidates/interviewer/${user.id}` 
+    : '/api/candidates';
+    
   const { data: candidates = [], isLoading: candidatesLoading } = useQuery({
-    queryKey: ['/api/candidates'],
+    queryKey: [candidatesEndpoint],
   });
 
   const { data: vacancies = [], isLoading: vacanciesLoading } = useQuery({

@@ -36,6 +36,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { CandidatePhoto } from '@/components/CandidatePhoto';
 
 interface CandidateDetailsModalProps {
   open: boolean;
@@ -61,7 +62,12 @@ export default function CandidateDetailsModal({ open, onOpenChange, candidate }:
       return apiRequest('PUT', `/api/interview-stages/${stageId}/comments`, { comments });
     },
     onSuccess: () => {
+      // Инвалидация ВСЕХ связанных query keys для синхронизации отзывов во всех разделах
       queryClient.invalidateQueries({ queryKey: ['/api/interview-stages/candidate', candidate.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/candidates'] });
+      queryClient.invalidateQueries({ queryKey: ['documentation-candidates'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/candidates/archived'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/interviews'] });
       setEditingFeedback(null);
       setEditedFeedbackText('');
       toast({
@@ -137,11 +143,11 @@ export default function CandidateDetailsModal({ open, onOpenChange, candidate }:
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-              <span className="text-primary-600 font-semibold text-lg">
-                {candidate.fullName.split(' ').map((n: string) => n[0]).join('')}
-              </span>
-            </div>
+            <CandidatePhoto 
+              photoUrl={candidate.photoUrl} 
+              name={candidate.fullName}
+              size="md"
+            />
             <div>
               <span className="text-xl">{candidate.fullName}</span>
               <div className="mt-1">

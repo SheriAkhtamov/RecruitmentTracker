@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ProgressTimeline } from '@/components/ui/progress-timeline';
+import { CandidatePhoto } from '@/components/CandidatePhoto';
 import { 
   Mail, 
   Phone, 
@@ -109,11 +110,11 @@ export default function CandidateProfileModal({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="border-b border-gray-200 pb-4">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-              <span className="text-lg font-medium text-primary-600">
-                {getInitials(candidate.fullName)}
-              </span>
-            </div>
+            <CandidatePhoto 
+              photoUrl={candidate.photoUrl} 
+              name={candidate.fullName}
+              size="md"
+            />
             <div>
               <DialogTitle className="text-xl">{candidate.fullName}</DialogTitle>
               <p className="text-sm text-gray-500">

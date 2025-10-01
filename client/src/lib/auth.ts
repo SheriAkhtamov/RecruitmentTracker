@@ -40,3 +40,24 @@ export function canManageAnyInterview(user: User): boolean {
 export function canApproveInterview(user: User, interviewerId: number): boolean {
   return user.role === 'admin' || user.id === interviewerId;
 }
+
+// New permission functions for employees
+export function canAccessDocumentation(user: User): boolean {
+  return user.role === 'admin' || user.role === 'hr_manager';
+}
+
+export function canAccessArchive(user: User): boolean {
+  return user.role === 'admin' || user.role === 'hr_manager';
+}
+
+export function canAccessAnalytics(user: User): boolean {
+  return user.role === 'admin' || user.role === 'hr_manager' || Boolean(user.hasReportAccess);
+}
+
+export function canAccessAdmin(user: User): boolean {
+  return user.role === 'admin';
+}
+
+export function isEmployee(user: User): boolean {
+  return user.role === 'employee';
+}
