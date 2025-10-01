@@ -247,7 +247,7 @@ export async function initializeDatabase(): Promise<void> {
 
 async function updateExistingTables(): Promise<void> {
   try {
-    // Make email column nullable for Telegram bot users
+    // Make email column nullable for candidates without email
     await pool!.query(`
       ALTER TABLE candidates 
       ALTER COLUMN email DROP NOT NULL;

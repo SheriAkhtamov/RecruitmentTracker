@@ -34,6 +34,7 @@ export interface IStorage {
   
   // Candidates
   getCandidates(): Promise<Candidate[]>;
+  getActiveCandidates(): Promise<Candidate[]>; // Only candidates with 'active' status
   getCandidate(id: number): Promise<Candidate | undefined>;
 
   getCandidatesByVacancy(vacancyId: number): Promise<Candidate[]>;
@@ -331,6 +332,46 @@ export class DatabaseStorage implements IStorage {
     return candidate || undefined;
   }
 
+  /**
+   * Get only active candidates (excluding documentation, hired, rejected, archived, dismissed)
+   * This is used in the main Candidates section to show only candidates in active recruitment
+   */
+  async getActiveCandidates(): Promise<Candidate[]> {
+    this.ensureDb();
+    return await db
+      .select({
+        id: candidates.id,
+        fullName: candidates.fullName,
+        email: candidates.email,
+        phone: candidates.phone,
+        city: candidates.city,
+        vacancyId: candidates.vacancyId,
+        resumeUrl: candidates.resumeUrl,
+        resumeFilename: candidates.resumeFilename,
+        photoUrl: candidates.photoUrl,
+        source: candidates.source,
+        interviewStageChain: candidates.interviewStageChain,
+        currentStageIndex: candidates.currentStageIndex,
+        status: candidates.status,
+        rejectionReason: candidates.rejectionReason,
+        rejectionStage: candidates.rejectionStage,
+        parsedResumeData: candidates.parsedResumeData,
+        createdBy: candidates.createdBy,
+        createdAt: candidates.createdAt,
+        updatedAt: candidates.updatedAt,
+        createdByUser: {
+          id: users.id,
+          fullName: users.fullName,
+          email: users.email,
+          position: users.position,
+        },
+      })
+      .from(candidates)
+      .leftJoin(users, eq(candidates.createdBy, users.id))
+      .where(eq(candidates.status, 'active'))
+      .orderBy(desc(candidates.createdAt));
+  }
+
 
 
   async getCandidatesByVacancy(vacancyId: number): Promise<Candidate[]> {
@@ -378,7 +419,11 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(interviewStages.interviewerId, interviewerId),
-          eq(candidates.status, 'active') // Only show active candidates
+          eq(candidates.status, 'active'), // Only show active candidates
+          or(
+            eq(interviewStages.status, 'pending'),
+            eq(interviewStages.status, 'in_progress')
+          )
         )
       )
       .orderBy(desc(candidates.createdAt));

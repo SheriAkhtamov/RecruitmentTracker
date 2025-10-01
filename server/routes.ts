@@ -690,6 +690,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get candidates assigned to specific interviewer (for employees)
+  app.get('/api/candidates/interviewer/:id', requireAuth, async (req, res) => {
+    try {
+      const interviewerId = parseInt(req.params.id);
+      const userId = req.session!.user!.id;
+      
+      // Security check: employees can only see their own assigned candidates
+      if (req.session!.user!.role === 'employee' && interviewerId !== userId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+      
+      const candidates = await storage.getCandidatesByInterviewer(interviewerId);
+      res.json(candidates);
+    } catch (error) {
+      console.error('Failed to fetch interviewer candidates:', error);
+      res.status(500).json({ error: 'Failed to fetch interviewer candidates' });
+    }
+  });
+
   app.get('/api/candidates/archived', requireAuth, async (req, res) => {
     console.log('Archived candidates route hit');
     try {
